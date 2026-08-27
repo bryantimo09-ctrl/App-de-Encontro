@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Um convite</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#f4ecdf;
+    --night:#241c3a;
+    --night-2:#2f2650;
+    --wax:#b5453f;
+    --gold:#c9a15a;
+    --rose:#d69aa0;
+    --muted:#cabfe0;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(201,161,90,0.10), transparent 45%),
+      radial-gradient(ellipse at 85% 85%, rgba(214,154,160,0.10), transparent 40%),
+      linear-gradient(180deg, var(--night), var(--night-2));
+    color:var(--ink);
+    font-family:'Lora', serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    overflow-x:hidden;
+  }
+  .stage{ width:100%; max-width:560px; }
+
+  /* ---------- ENVELOPE ---------- */
+  #envelope-stage{
+    display:flex; flex-direction:column; align-items:center; gap:28px;
+    text-align:center;
+  }
+  .envelope{
+    position:relative;
+    width:280px; height:190px;
+    cursor:pointer;
+    filter:drop-shadow(0 18px 30px rgba(0,0,0,0.35));
+  }
+  .envelope .back{
+    position:absolute; inset:0;
+    background:#e8d9c3;
+    border-radius:6px;
+  }
+  .envelope .flap{
+    position:absolute; top:0; left:0; right:0; height:100%;
+    background:#dcc9ab;
+    clip-path:polygon(0 0, 50% 55%, 100% 0);
+    transform-origin:top;
+    transition:transform 0.9s cubic-bezier(.6,.1,.2,1);
+    border-radius:6px 6px 0 0;
+    z-index:3;
+  }
+  .envelope.open .flap{ transform:rotateX(160deg); }
+  .seal{
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #d15b53, var(--wax) 65%, #7c2b26 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cormorant Garamond', serif; font-style:italic; font-size:20px;
+    color:#f3d9b8; z-index:4; transition:opacity .3s ease, transform .3s ease;
+    box-shadow:0 3px 6px rgba(0,0,0,0.4);
+  }
+  .envelope.open .seal{ opacity:0; transform:translate(-50%,-50%) scale(0.4) rotate(25deg); }
+  .card-peek{
+    position:absolute; bottom:6px; left:12px; right:12px; height:150px;
+    background:var(--ink); border-radius:4px; z-index:1;
+    transform:translateY(30px);
+    transition:transform 0.9s cubic-bezier(.2,.7,.3,1) 0.25s;
+  }
+  .envelope.open .card-peek{ transform:translateY(-92px); }
+  .hint{ color:var(--muted); letter-spacing:.14em; font-size:12px; text-transform:uppercase; }
+
+  /* ---------- LETTER ---------- */
+  #letter-stage{ display:none; }
+  #letter-stage.show{ display:block; animation:rise .7s ease both; }
+  @keyframes rise{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:none;} }
+
+  .letter{
+    background:linear-gradient(180deg, #faf3e6, #f2e6d1);
+    color:#332616;
+    border-radius:3px;
+    padding:46px 40px 38px;
+    box-shadow:0 25px 50px rgba(0,0,0,0.45);
+    position:relative;
+  }
+  .letter::before{
+    content:"";
+    position:absolute; inset:10px;
+    border:1px solid rgba(51,38,22,0.25);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-family:'Lora',serif; font-size:11px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--wax); text-align:center; margin-bottom:6px;
+  }
+  h1{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600; font-size:38px; text-align:center; margin:0 0 4px;
+  }
+  .sub{ text-align:center; font-style:italic; color:#6b5a3f; margin:0 0 26px; font-size:16px;}
+  .prose{ font-size:16.5px; line-height:1.7; margin:0 0 14px; }
+  .prose.signature{ text-align:right; font-family:'Cormorant Garamond', serif; font-style:italic; font-size:20px; margin-top:22px; }
+  .heart{ text-align:center; font-size:26px; margin:18px 0 0; }
+  .divider{ width:64px; height:1px; background:var(--wax); margin:22px auto; opacity:.5; }
+
+  .cta-row{ text-align:center; margin-top:8px; }
+  .cta{
+    appearance:none; border:1px solid #332616; background:transparent; color:#332616;
+    font-family:'Lora', serif; letter-spacing:.08em; font-size:13px; text-transform:uppercase;
+    padding:13px 28px; border-radius:2px; cursor:pointer; transition:all .25s ease;
+  }
+  .cta:hover{ background:#332616; color:#faf3e6; }
+
+  /* ---------- FORM ---------- */
+  #form-stage{ display:none; }
+  #form-stage.show{ display:block; animation:rise .6s ease both; }
+  .panel{
+    background:rgba(244,236,223,0.04);
+    border:1px solid rgba(201,161,90,0.25);
+    border-radius:6px;
+    padding:34px 30px;
+  }
+  .panel h2{
+    font-family:'Cormorant Garamond', serif; font-weight:600; font-size:26px;
+    margin:0 0 6px; color:var(--ink);
+  }
+  .panel .lede{ color:var(--muted); font-size:14px; margin:0 0 26px; font-style:italic; }
+
+  label{ display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin:0 0 6px; }
+  .field{ margin-bottom:18px; }
+  input, select, textarea{
+    width:100%; background:rgba(244,236,223,0.06); border:1px solid rgba(202,191,224,0.3);
+    color:var(--ink); font-family:'Lora',serif; font-size:15px; padding:12px 13px; border-radius:4px;
+    outline:none; transition:border-color .2s ease, background .2s ease;
+  }
+  input:focus, select:focus, textarea:focus{ border-color:var(--gold); background:rgba(244,236,223,0.1); }
+  select{ appearance:none; background-image:linear-gradient(45deg, transparent 50%, var(--gold) 50%), linear-gradient(135deg, var(--gold) 50%, transparent 50%); background-position: calc(100% - 20px) center, calc(100% - 14px) center; background-size:6px 6px; background-repeat:no-repeat; }
+  textarea{ resize:vertical; min-height:70px; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media(max-width:480px){ .row2{ grid-template-columns:1fr; } .letter{ padding:34px 22px; } .panel{ padding:26px 18px; } h1{font-size:30px;} }
+
+  .submit-row{ margin-top:26px; text-align:center; }
+  .submit{
+    width:100%; appearance:none; border:none; border-radius:4px; padding:15px;
+    background:linear-gradient(135deg, var(--gold), #b0803a); color:#241c3a;
+    font-family:'Lora', serif; font-weight:500; letter-spacing:.05em; text-transform:uppercase; font-size:13px;
+    cursor:pointer; transition:filter .2s ease, transform .2s ease;
+  }
+  .submit:hover{ filter:brightness(1.08); transform:translateY(-1px); }
+  .submit:disabled{ opacity:.55; cursor:wait; }
+  .fine{ text-align:center; color:var(--muted); font-size:12px; margin-top:14px; opacity:.75; }
+  .error{ color:#e79a94; font-size:13px; margin-top:10px; text-align:center; display:none; }
+
+  /* ---------- SUCCESS ---------- */
+  #success-stage{ display:none; text-align:center; }
+  #success-stage.show{ display:block; animation:rise .7s ease both; }
+  .seal-big{
+    width:78px; height:78px; border-radius:50%; margin:0 auto 22px;
+    background:radial-gradient(circle at 35% 30%, #d15b53, var(--wax) 65%, #7c2b26 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cormorant Garamond', serif; font-style:italic; font-size:30px; color:#f3d9b8;
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+  }
+  #success-stage h2{ font-family:'Cormorant Garamond', serif; font-size:30px; margin:0 0 10px; }
+  #success-stage p{ color:var(--muted); font-size:15px; line-height:1.6; }
+
+  .submit-row.two-buttons{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media(max-width:420px){ .submit-row.two-buttons{ grid-template-columns:1fr; } }
+  .submit.ghost{
+    background:transparent; border:1px solid rgba(201,161,90,0.6); color:var(--gold);
+  }
+  .submit.ghost:hover{ background:rgba(201,161,90,0.12); }
+  .date-card{
+    margin-top:24px; text-align:left;
+    background:linear-gradient(180deg, #faf3e6, #f2e6d1);
+    color:#332616; border-radius:10px; padding:28px 26px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.4);
+    position:relative;
+  }
+  .date-card::before{
+    content:""; position:absolute; inset:8px;
+    border:1px solid rgba(51,38,22,0.2); border-radius:6px; pointer-events:none;
+  }
+  .date-card h3{
+    font-family:'Cormorant Garamond', serif; font-size:24px; text-align:center;
+    margin:0 0 4px; color:#332616;
+  }
+  .date-card .card-heart{ text-align:center; font-size:20px; margin-bottom:16px; }
+  .date-card dl{ margin:0; }
+  .date-card .row{
+    display:flex; justify-content:space-between; gap:12px;
+    padding:9px 0; border-bottom:1px dashed rgba(51,38,22,0.2); font-size:14.5px;
+  }
+  .date-card .row:last-child{ border-bottom:none; }
+  .date-card .row span:first-child{ color:#6b5a3f; text-transform:uppercase; font-size:11px; letter-spacing:.06em; }
+  .date-card .row span:last-child{ font-weight:500; text-align:right; }
+  .date-card .stamp{ text-align:center; margin-top:18px; font-style:italic; font-size:13px; color:#6b5a3f; }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- ENVELOPE -->
+  <div id="envelope-stage">
+    <div class="envelope" id="envelope" onclick="openEnvelope()">
+      <div class="back"></div>
+      <div class="card-peek"></div>
+      <div class="flap"></div>
+      <div class="seal">B</div>
+    </div>
+    <div class="hint">toque no envelope</div>
+  </div>
+
+  <!-- LETTER -->
+  <div id="letter-stage">
+    <div class="letter">
+      <div class="eyebrow">Um pedido formal</div>
+      <h1>Você me faria a honra?</h1>
+      <p class="sub">de sair comigo, num dia à sua escolha</p>
+      <div class="divider"></div>
+      <p class="prose">Faz um tempinho que eu ando de olho em você, me perdendo no seu olhar e sorrindo com o seu riso pela tela azul — acho que chegou a hora de viver tudo isso pessoalmente.</p>
+      <p class="prose">Eu poderia te perguntar, mas queria fazer algo mais especial, mas a nossa cara. Então, porque não inverter os papéis? Papel e caneta na mão, expectativa no coração, me diz pra onde vamos, e eu cuido do resto meu bem. Mas…Então, quer sair comigo?</p>
+      <p class="heart">❤️</p>
+      <p class="prose signature">— Bryan</p>
+      <div class="cta-row">
+        <button class="cta" onclick="showForm()">Sim, Yes ou Com Certeza?</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div id="form-stage">
+    <div class="panel">
+      <h2>Seus termos, seu convite</h2>
+      <p class="lede">Preencha como preferir — eu recebo tudo certinho do outro lado.</p>
+
+      <form id="inviteForm">
+        <div class="field">
+          <label for="name">Seu nome</label>
+          <input type="text" id="name" name="name" required placeholder="Como você quer ser chamada">
+        </div>
+
+        <div class="field">
+          <label for="email">Seu e-mail (opcional — só se quiser receber a confirmação)</label>
+          <input type="email" id="email" name="email" placeholder="voce@exemplo.com">
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="date">Data preferida</label>
+            <input type="date" id="date" name="Data" required>
+          </div>
+          <div class="field">
+            <label for="time">Horário</label>
+            <input type="time" id="time" name="Horário" required>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="place">Preferência de local</label>
+          <select id="place" name="Local" required>
+            <option value="" disabled selected>Escolha uma opção</option>
+            <option>Restaurante tranquilo</option>
+            <option>Café à tarde</option>
+            <option>Cinema</option>
+            <option>Passeio ao ar livre</option>
+            <option>Bar com música ao vivo</option>
+            <option>Surpresa — você escolhe, Bryan</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="food">Preferência de comida</label>
+          <input type="text" id="food" name="Comida" placeholder="Ex: italiana, japonesa, sem restrição...">
+        </div>
+
+        <div class="field">
+          <label for="message">Algum recado? (opcional)</label>
+          <textarea id="message" name="Recado" placeholder="Fique à vontade..."></textarea>
+        </div>
+
+        <input type="hidden" name="_subject" value="💌 Resposta ao convite">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_autoresponse" value="Recebemos sua resposta com carinho! O Bryan já sabe da data, horário e preferências que você escolheu, e vai confirmar os detalhes com você em breve. Até lá ✨">
+
+        <div class="submit-row two-buttons">
+          <button type="submit" class="submit" id="submitBtn">Enviar resposta</button>
+          <button type="button" class="submit ghost" id="cardBtn" onclick="generateCard()">Só quero o cartão 📸</button>
+        </div>
+        <p class="error" id="errorMsg">Não foi possível enviar agora. Tente novamente em instantes.</p>
+      </form>
+
+      <div class="date-card" id="dateCard" style="display:none;">
+        <h3>Nosso encontro</h3>
+        <div class="card-heart">🤍</div>
+        <dl>
+          <div class="row"><span>Com</span><span id="cardName">—</span></div>
+          <div class="row"><span>Data</span><span id="cardDate">—</span></div>
+          <div class="row"><span>Horário</span><span id="cardTime">—</span></div>
+          <div class="row"><span>Local</span><span id="cardPlace">—</span></div>
+          <div class="row"><span>Comida</span><span id="cardFood">—</span></div>
+        </dl>
+        <p class="stamp">printa e guarda 💛</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="success-stage">
+    <div class="seal-big">✓</div>
+    <h2>Convite respondido</h2>
+    <p id="successNote">Tudo certo — as informações já estão a caminho do Bryan, e uma confirmação chega no seu e-mail em instantes.</p>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // IMPORTANTE (Bryan): troque o e-mail abaixo pelo seu e-mail real.
+  // Este site usa o FormSubmit (formsubmit.co), um serviço gratuito
+  // que envia os dados do formulário para o seu e-mail sem precisar
+  // de servidor. Na PRIMEIRA vez que alguém enviar o formulário,
+  // o FormSubmit manda um e-mail de confirmação para o endereço
+  // abaixo — você precisa clicar no link de confirmação uma única
+  // vez para ativar o recebimento das próximas respostas.
+  // ============================================================
+  const SEU_EMAIL = "bryantimo09@gmail.com";
+
+  function openEnvelope(){
+    const env = document.getElementById('envelope');
+    env.classList.add('open');
+    setTimeout(() => {
+      document.getElementById('envelope-stage').style.display = 'none';
+      document.getElementById('letter-stage').classList.add('show');
+    }, 750);
+  }
+
+  function showForm(){
+    document.getElementById('letter-stage').style.display = 'none';
+    document.getElementById('form-stage').classList.add('show');
+  }
+
+  document.getElementById('inviteForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+    errorMsg.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    const formData = new FormData(e.target);
+    const hasEmail = !!formData.get('email');
+
+    try{
+      const res = await fetch(`https://formsubmit.co/ajax/${SEU_EMAIL}`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      });
+      if(!res.ok) throw new Error('network');
+
+      document.getElementById('successNote').textContent = hasEmail
+        ? 'Tudo certo — as informações já estão a caminho do Bryan, e uma confirmação chega no seu e-mail em instantes.'
+        : 'Tudo certo — as informações já estão a caminho do Bryan.';
+
+      document.getElementById('form-stage').style.display = 'none';
+      document.getElementById('success-stage').classList.add('show');
+    }catch(err){
+      errorMsg.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Enviar resposta';
+    }
+  });
+
+  function generateCard(){
+    document.getElementById('cardName').textContent = document.getElementById('name').value || '—';
+    document.getElementById('cardDate').textContent = document.getElementById('date').value || '—';
+    document.getElementById('cardTime').textContent = document.getElementById('time').value || '—';
+    document.getElementById('cardPlace').textContent = document.getElementById('place').value || '—';
+    document.getElementById('cardFood').textContent = document.getElementById('food').value || 'sem preferência';
+
+    const card = document.getElementById('dateCard');
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+</script>
+</body>
+</html>
